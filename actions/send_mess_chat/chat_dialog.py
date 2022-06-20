@@ -36,11 +36,15 @@ file: str = "members_group.db"
 files: str = "members_group.csv"
 
 
+def sending_files(client, groups_wr):
+    """Отправка сообщений в чаты"""
+    link_to_the_file: str = console.input("[bold red][+] Введите ссылку на файл: ")
+    client.send_file(groups_wr, link_to_the_file)
+
+
 def sending_messages_via_chats(message_text):
     """Массовая рассылка в чаты"""
     clearing_console_showing_banner()
-    # Спрашиваем у пользователя какое сообщение будем отправлять
-    # message_text: str = console.input("[bold red][+] Введите сообщение которое будем рассылать: ")
     # Спрашиваем у пользователя, через какое время будем отправлять сообщения
     message_text_time: str = console.input(
         "[bold red][+] Введите время, через какое время будем отправлять сообщения: ")
@@ -78,6 +82,7 @@ def sending_messages_via_chats(message_text):
                     client(JoinChannelRequest(groups_wr))
                     # Рассылаем сообщение по чатам
                     client.send_message(entity=groups_wr, message=message_text)
+                    sending_files(client, groups_wr)
                     # Работу записываем в лог файл, для удобства слежения, за изменениями
                     time.sleep(int(message_text_time))
                     print(f"[bold red]{groups_wr} сообщение написал!")
@@ -147,6 +152,7 @@ def message_entry_window():
         """Выводим значения с поля ввода (то что ввел пользователь)"""
         message_text = text.get("1.0", 'end-1c')
         closing_the_input_field()
+        print("[bold red][+] Введите текс сообщения которое будем отправлять в чаты: ")
         sending_messages_via_chats(message_text)
 
     def closing_the_input_field():
