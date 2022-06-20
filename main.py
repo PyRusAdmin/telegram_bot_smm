@@ -456,7 +456,6 @@ def recording_the_delay_time_of_actions():
 
 def program_settings():
     """Настройки программы, запись времени задержки, api_id, api_hash, запись ссылки для inviting"""
-
     # Чистим консоль, выводим банер
     clearing_console_showing_banner()
     # Выводим таблицу
