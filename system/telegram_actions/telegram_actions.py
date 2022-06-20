@@ -64,12 +64,3 @@ def get_from_the_list_phone_api_id_api_hash(row):
     api_hash = users['hash']
     return phone, api_id, api_hash
 
-
-# def connecting_to_the_telegram_client(records):
-#     """Подключаемся к телеграммам авторизации, с проверкой аккаунтов на ликвидность"""
-#     for row in records:
-#         users = {'id': int(row[0]), 'hash': row[1], 'phone': row[2]}
-#         phone = users['phone']
-#         api_id = users['id']
-#         api_hash = users['hash']
-#         return phone, api_id, api_hash
