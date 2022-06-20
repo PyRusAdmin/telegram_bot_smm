@@ -32,6 +32,3 @@ def opening_the_database(folder, file):
         cursor = sqlite_connection.cursor()
         return cursor, sqlite_connection
 
-# if __name__ == "__main__":
-#     sqlite_config_db()
-#     sqlite_config_db_with()
