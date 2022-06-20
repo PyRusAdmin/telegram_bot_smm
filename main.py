@@ -532,12 +532,6 @@ def working_with_the_reaction():
     # 0
     table.add_row("[bold cyan]0", "[bold green]Ставим реакцию на 1 пост",
                   "[bold cyan]Ставим реакции на один пост с группе / канале")
-    # # 1
-    # table.add_row("1", "Запись чатов",
-    #               "Запись чатов для рассылки сообщений")
-    # # 2
-    # table.add_row("[bold cyan]2", "[bold green]Ставим реакцию на все посты группы / канала",
-    #               "[bold cyan]Ставим реакции на все посты группы / канала нужна ссылка на последний пост")
     # 1
     table.add_row("1", "Помощь", "Открыть файл с краткой инструкцией")
     # 2
@@ -554,12 +548,6 @@ def working_with_the_reaction():
         users_choice_of_reaction()
         # После отработки функции перезапускам скрипт
         os.system("python main.py")
-    # elif user_input == "1":
-    #     """Запись чатов для рассылки"""
-    #     creating_a_list_of_chats_for_mailing()
-    # # elif user_input == "2":
-    # #     """Ставим реакции на все посты группы / канала нужна ссылка на последний пост"""
-    # #     print("[!] В разработке!")
     elif user_input == "1":
         """Помощь"""
         open_help()
