@@ -18,6 +18,8 @@ from actions.pars.pars_contact import show_account_contact_list
 from actions.reactions.reactions import users_choice_of_reaction
 from actions.send_mess_chat.chat_dialog import message_entry_window
 from actions.send_mess_chat.chat_dialog import output_the_input_field
+from actions.send_mess_chat.chat_dialog import sending_files_via_chats
+from actions.send_mess_chat.chat_dialog import sending_messages_files_via_chats
 from actions.sms.sms import we_send_a_message_from_all_accounts
 from actions.subscription.subscription import cleaning_the_list_with_groups_for_subscription
 from actions.subscription.subscription import subscription_all
@@ -581,16 +583,22 @@ def sending_messages_chats():
     table.add_row("[bold cyan]0", "[bold green]Рассылка сообщений по чатам",
                   "[bold cyan]Рассылка сообщений по чатам, потребуется заранее записать чаты в файл")
     # 1
-    table.add_row("1", "Формирование списка чатов",
-                  "Формирование списка чатов для рассылки сообщений. Откроется txt файл для записи списка чатов")
+    table.add_row("1", "Рассылка файлов по чатам",
+                  "Рассылка файлов по чатам, потребуется заранее записать чаты в файл")
     # 2
-    table.add_row("[bold cyan]2", "[bold green]Помощь",
-                  "[bold cyan]Открыть файл с краткой инструкцией")
+    table.add_row("[bold cyan]2", "[bold green]Рассылка сообщений + файлов по чатам",
+                  "[bold cyan]Рассылка сообщений + файлов по чатам, потребуется заранее записать чаты в файл")
     # 3
-    table.add_row("3", "Вернуться назад",
-                  "Возвращаемся в начальное меню")
+    table.add_row("3", "Формирование списка чатов",
+                  "Формирование списка чатов для рассылки сообщений. Откроется txt файл для записи списка чатов")
     # 4
-    table.add_row("[bold cyan]4", "[bold green]Закрыть программу",
+    table.add_row("[bold cyan]4", "[bold green]Помощь",
+                  "[bold cyan]Открыть файл с краткой инструкцией")
+    # 5
+    table.add_row("5", "Вернуться назад",
+                  "Возвращаемся в начальное меню")
+    # 6
+    table.add_row("[bold cyan]6", "[bold green]Закрыть программу",
                   "[bold cyan]Закрываем программу")
     # Отображаем таблицу
     console.print(table, justify="center")
@@ -601,18 +609,28 @@ def sending_messages_chats():
         # После отработки функции перезапускам скрипт
         os.system("python main.py")
     elif user_input == "1":
+        """Рассылка файлов по чатам"""
+        sending_files_via_chats()
+        # После отработки функции перезапускам скрипт
+        os.system("python main.py")
+    elif user_input == "2":
+        """Рассылка сообщений + файлов по чатам"""
+        sending_messages_files_via_chats()
+        # После отработки функции перезапускам скрипт
+        os.system("python main.py")
+    elif user_input == "3":
         """Запись чатов в файл для рассылки сообщений"""
         output_the_input_field()
-    elif user_input == "2":
+    elif user_input == "4":
         """Помощь"""
         open_help()
         # После отработки функции возвращаемся в начальное меню
         program_settings()
-    elif user_input == "3":
+    elif user_input == "5":
         """Вернуться назад"""
         # После отработки функции возвращаемся в начальное меню
         os.system("python main.py")
-    elif user_input == "4":
+    elif user_input == "6":
         """Закрыть программу"""
         exit()
     else:

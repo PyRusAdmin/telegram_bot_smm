@@ -37,10 +37,223 @@ file: str = "members_group.db"
 files: str = "members_group.csv"
 
 
-def sending_files(client, groups_wr):
-    """Отправка сообщений в чаты"""
-    link_to_the_file: str = console.input("[bold red][+] Введите ссылку на файл: ")
-    client.send_file(groups_wr, link_to_the_file)
+def sending_files_via_chats():
+    """Рассылка файлов по чатам"""
+
+    clearing_console_showing_banner()
+    # Спрашиваем у пользователя, через какое время будем отправлять сообщения
+    link_to_the_file: str = console.input("[bold red][+] Введите название файла с папки setting/files_to_send: ")
+    message_text_time: str = console.input(
+        "[bold red][+] Введите время, через какое время будем отправлять файлы: ")
+
+    # Открываем базу данных для работы с аккаунтами accounts/config.db
+    cursor = opening_a_database_with_accounts()
+    # Количество аккаунтов на данный момент в работе
+    records = cursor.fetchall()
+    print(f"[bold red]Всего accounts: {len(records)}")
+    for row in records:
+        # Получаем со списка phone, api_id, api_hash
+        phone, api_id, api_hash = get_from_the_list_phone_api_id_api_hash(row)
+
+        client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
+        try:
+            # Подсоединяемся к telegram
+            client.connect()
+            first_name, last_name = account_name(client, name_client)
+            print(f"[bold red][!] Account connect {first_name} {last_name} {phone}")
+
+            # Открываем базу данных
+            cursor, sqlite_connection = opening_the_database(folder, file)
+            cursor.execute("""SELECT * from writing_group_links""")
+            records = cursor.fetchall()
+            print(f"[bold red]Всего групп: {len(records)}")
+
+            # Поочередно выводим записанные группы
+            for groups in records:
+                group = {'writing_group_links': groups[0]}
+                # Вытягиваем данные из кортежа, для подстановки
+                groups_wr = group['writing_group_links']
+
+                try:
+                    # Подписываемся на группу которую будем inviting, если аккаунт новый, то он автоматически подпишется
+                    client(JoinChannelRequest(groups_wr))
+                    # Рассылаем файлов по чатам
+                    client.send_file(groups_wr, f"setting/files_to_send/{link_to_the_file}")
+                    # Работу записываем в лог файл, для удобства слежения, за изменениями
+                    time.sleep(int(message_text_time))
+                    print(f"[bold red]{groups_wr} сообщение написал!")
+
+                except ChannelPrivateError:
+                    """Указанный канал / группа является приватным, и у вас нет разрешения на доступ к нему,
+                    или запрет на действия. """
+                    print("[bold red][!] Указанный канал является приватным, или вам запретили подписываться.")
+                    deleting_groups_and_channels(folder, file, groups_wr)
+                except ValueError:
+                    """Не верное имя канала / группы"""
+                    print("[bold red][!] Не верное имя канала / группы.")
+                    deleting_groups_and_channels(folder, file, groups_wr)
+                except TypeError:
+                    """Ссылка не является группой или каналом"""
+                    print(f"[bold red][!] Ссылка {groups_wr} не является группой или каналом")
+                    deleting_groups_and_channels(folder, file, groups_wr)
+                except (PeerFloodError, FloodWaitError):
+                    """Предупреждение о Flood"""
+                    print("[red][!] Предупреждение о Flood от telegram.")
+                except ChannelsTooMuchError:
+                    """Если аккаунт подписан на множество групп и каналов, то отписываемся от них"""
+                    for dialog in client.iter_dialogs():
+                        print(f"[green]{dialog.name}, {dialog.id}")
+                        try:
+                            client.delete_dialog(dialog)
+                        except ChannelPrivateError:
+                            continue
+                        print('[green][+] Список почистили, и в файл записали.')
+                    continue
+                except ChatWriteForbiddenError:
+                    """Вы не подписаны на группу / канал, открываем функцию подписки и подписываемся"""
+                    telegram_chat_write_forbidden_error(client)
+                    break
+                except UserBannedInChannelError:
+                    telegram_user_banned_in_channel_error(client)
+                    break
+                except (KeyError, KeyboardInterrupt):
+                    print("[bold green][+] Пождите 20-25 Секунд...")
+                    time.sleep(random.randrange(20, 25))
+                    client.disconnect()
+                    break
+                except (TypeError, UnboundLocalError):
+                    continue
+            # Отключаем клиент, для обхода проблем
+            client.disconnect()
+        except (PhoneNumberBannedError, UserDeactivatedBanError):
+            # Удаляем номер телефона с базы данных
+            telegram_phone_number_banned_error(client, phone)
+            continue
+        except KeyError:
+            sys.exit(1)
+
+
+def sending_messages_files_via_chats():
+    """Рассылка сообщений + файлов по чатам"""
+
+    # Создаем программу
+    root = Tk()
+    root.title(f"Telegram_BOT_SMM: {program_version} от {date_of_program_change}")
+    # Создаем окно ввода текста, width=50, height=25 выбираем размер программы
+    text = Text(width=50, height=25)
+    # Создаем поле ввода
+    text.pack()
+
+    def output_values_from_the_input_field():
+        """Выводим значения с поля ввода (то что ввел пользователь)"""
+        message_text = text.get("1.0", 'end-1c')
+        closing_the_input_field()
+        clearing_console_showing_banner()
+        print("[bold red][+] Введите текс сообщения которое будем отправлять в чаты: ")
+
+        link_to_the_file: str = console.input("[bold red][+] Введите название файла с папки setting/files_to_send: ")
+        # Спрашиваем у пользователя, через какое время будем отправлять сообщения
+        message_text_time: str = console.input(
+            "[bold red][+] Введите время, через какое время будем отправлять сообщения: ")
+
+        # Открываем базу данных для работы с аккаунтами accounts/config.db
+        cursor = opening_a_database_with_accounts()
+        # Количество аккаунтов на данный момент в работе
+        records = cursor.fetchall()
+        print(f"[bold red]Всего accounts: {len(records)}")
+        for row in records:
+            # Получаем со списка phone, api_id, api_hash
+            phone, api_id, api_hash = get_from_the_list_phone_api_id_api_hash(row)
+
+            client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
+            try:
+                # Подсоединяемся к telegram
+                client.connect()
+                first_name, last_name = account_name(client, name_client)
+                print(f"[bold red][!] Account connect {first_name} {last_name} {phone}")
+
+                # Открываем базу данных
+                cursor, sqlite_connection = opening_the_database(folder, file)
+                cursor.execute("""SELECT * from writing_group_links""")
+                records = cursor.fetchall()
+                print(f"[bold red]Всего групп: {len(records)}")
+
+                # Поочередно выводим записанные группы
+                for groups in records:
+                    group = {'writing_group_links': groups[0]}
+                    # Вытягиваем данные из кортежа, для подстановки
+                    groups_wr = group['writing_group_links']
+
+                    try:
+                        # Подписываемся на группу которую будем inviting, если аккаунт новый, то он автоматически
+                        # подпишется
+                        client(JoinChannelRequest(groups_wr))
+                        # Рассылаем сообщение по чатам
+                        client.send_message(entity=groups_wr, message=message_text)
+                        # Рассылаем файлов по чатам
+                        client.send_file(groups_wr, f"setting/files_to_send/{link_to_the_file}")
+                        # Работу записываем в лог файл, для удобства слежения, за изменениями
+                        time.sleep(int(message_text_time))
+                        print(f"[bold red]{groups_wr} сообщение написал!")
+
+                    except ChannelPrivateError:
+                        """Указанный канал / группа является приватным, и у вас нет разрешения на доступ к нему,
+                        или запрет на действия. """
+                        print("[bold red][!] Указанный канал является приватным, или вам запретили подписываться.")
+                        deleting_groups_and_channels(folder, file, groups_wr)
+                    except ValueError:
+                        """Не верное имя канала / группы"""
+                        print("[bold red][!] Не верное имя канала / группы.")
+                        deleting_groups_and_channels(folder, file, groups_wr)
+                    except TypeError:
+                        """Ссылка не является группой или каналом"""
+                        print(f"[bold red][!] Ссылка {groups_wr} не является группой или каналом")
+                        deleting_groups_and_channels(folder, file, groups_wr)
+                    except (PeerFloodError, FloodWaitError):
+                        """Предупреждение о Flood"""
+                        print("[red][!] Предупреждение о Flood от telegram.")
+                    except ChannelsTooMuchError:
+                        """Если аккаунт подписан на множество групп и каналов, то отписываемся от них"""
+                        for dialog in client.iter_dialogs():
+                            print(f"[green]{dialog.name}, {dialog.id}")
+                            try:
+                                client.delete_dialog(dialog)
+                            except ChannelPrivateError:
+                                continue
+                            print('[green][+] Список почистили, и в файл записали.')
+                        continue
+                    except ChatWriteForbiddenError:
+                        """Вы не подписаны на группу / канал, открываем функцию подписки и подписываемся"""
+                        telegram_chat_write_forbidden_error(client)
+                        break
+                    except UserBannedInChannelError:
+                        telegram_user_banned_in_channel_error(client)
+                        break
+                    except (KeyError, KeyboardInterrupt):
+                        print("[bold green][+] Пождите 20-25 Секунд...")
+                        time.sleep(random.randrange(20, 25))
+                        client.disconnect()
+                        break
+                    except (TypeError, UnboundLocalError):
+                        continue
+                # Отключаем клиент, для обхода проблем
+                client.disconnect()
+            except (PhoneNumberBannedError, UserDeactivatedBanError):
+                # Удаляем номер телефона с базы данных
+                telegram_phone_number_banned_error(client, phone)
+                continue
+            except KeyError:
+                sys.exit(1)
+
+    def closing_the_input_field():
+        """Закрываем программу"""
+        root.destroy()
+
+    # Создаем кнопку по нажатии которой выведется поле ввода. После ввода чатов данные запишутся во временный файл
+    but = Button(root, text="Готово", command=output_values_from_the_input_field)
+    but.pack()
+    # Запускаем программу
+    root.mainloop()
 
 
 def sending_messages_via_chats(message_text):
@@ -83,7 +296,6 @@ def sending_messages_via_chats(message_text):
                     client(JoinChannelRequest(groups_wr))
                     # Рассылаем сообщение по чатам
                     client.send_message(entity=groups_wr, message=message_text)
-                    sending_files(client, groups_wr)
                     # Работу записываем в лог файл, для удобства слежения, за изменениями
                     time.sleep(int(message_text_time))
                     print(f"[bold red]{groups_wr} сообщение написал!")
