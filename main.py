@@ -20,6 +20,9 @@ from actions.send_mess_chat.chat_dialog import message_entry_window
 from actions.send_mess_chat.chat_dialog import output_the_input_field
 from actions.send_mess_chat.chat_dialog import sending_files_via_chats
 from actions.send_mess_chat.chat_dialog import sending_messages_files_via_chats
+from actions.sms.sms import sending_files_to_a_personal_account
+from actions.sms.sms import we_send_a_message_by_members
+from actions.sms.sms import we_send_a_message_by_numbers_contacts
 from actions.sms.sms import we_send_a_message_from_all_accounts
 from actions.subscription.subscription import cleaning_the_list_with_groups_for_subscription
 from actions.subscription.subscription import subscription_all
@@ -38,7 +41,6 @@ from system.auxiliary_functions.global_variables import console
 from system.auxiliary_functions.global_variables import toaster
 from system.baner.baner import date_of_program_change
 from system.baner.baner import program_version
-
 
 # Выводим название программы в шапке окна
 if platform == 'win32':
@@ -118,7 +120,7 @@ def main():
             os.system("python main.py")
         elif user_input == "5":
             """Рассылка сообщений по списку members.db"""
-            we_send_a_message_from_all_accounts()
+            sending_messages_to_a_personal_account()
             # После отработки функции возвращаемся в начальное меню
             os.system("python main.py")
         elif user_input == "6":
@@ -633,6 +635,72 @@ def sending_messages_chats():
         # После отработки функции возвращаемся в начальное меню
         os.system("python main.py")
     elif user_input == "6":
+        """Закрыть программу"""
+        exit()
+    else:
+        print("[bold red][!] Не верные введенные данные!")
+        os.system("python main.py")
+
+
+def sending_messages_to_a_personal_account():
+    """Рассылка сообщений в личку"""
+
+    # Чистим консоль, выводим банер
+    clearing_console_showing_banner()
+    # Выводим таблицу
+    table = Table(title="[bold red]Рассылка сообщений в личку!", box=box.HORIZONTALS)
+    # Формируем колонки таблицы
+    table.add_column("[bold red]№ функции", justify="center", style="cyan")
+    table.add_column("[bold red]Функция", justify="left", style="green")
+    table.add_column("[bold red]Описание", justify="left", style="cyan")
+
+    # Выводим текст в таблице
+    # 0
+    table.add_row("[bold cyan]0", "[bold green]Отправка сообщений в личку parsing список",
+                  "[bold cyan]Отправка сообщений в личку по parsing списку setting/members_group.db")
+    # 1
+    table.add_row("1", "Отправка сообщений в личку parsing список",
+                  "Отправка сообщений в личку по parsing списку parsing_result/members_contacts.db")
+    # 2
+    table.add_row("[bold cyan]2", "[bold green]Отправка файлов в личку",
+                  "[bold cyan]Отправка файлов в личку по parsing списку setting/members_group.db")
+    # 3
+    table.add_row("3", "Помощь",
+                  "Открыть файл с краткой инструкцией")
+    # 4
+    table.add_row("[bold cyan]4", "[bold green]Вернуться назад",
+                  "[bold cyan]Возвращаемся в начальное меню")
+    # 5
+    table.add_row("5", "Закрыть программу",
+                  "[bold cyan]Закрываем программу")
+    # Отображаем таблицу
+    console.print(table, justify="center")
+    user_input = console.input("[bold red][+] Введите номер: ")
+    if user_input == "0":
+        """Отправка сообщений в личку по parsing списку setting/members_group.db"""
+        we_send_a_message_by_members()
+        # После отработки функции перезапускам скрипт
+        os.system("python main.py")
+    elif user_input == "1":
+        """Отправка сообщений в личку по parsing списку parsing_result/members_contacts.db"""
+        we_send_a_message_by_numbers_contacts()
+        # После отработки функции перезапускам скрипт
+        os.system("python main.py")
+    elif user_input == "2":
+        """Отправка файлов в личку по parsing списку setting/members_group.db"""
+        sending_files_to_a_personal_account()
+        # После отработки функции перезапускам скрипт
+        os.system("python main.py")
+    elif user_input == "3":
+        """Помощь"""
+        open_help()
+        # Возвращаемся в начальное меню
+        sending_messages_chats()
+    elif user_input == "4":
+        """Вернуться назад"""
+        # После отработки функции возвращаемся в начальное меню
+        os.system("python main.py")
+    elif user_input == "5":
         """Закрыть программу"""
         exit()
     else:
