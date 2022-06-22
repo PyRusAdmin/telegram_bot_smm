@@ -74,10 +74,6 @@ def telegram_chat_write_forbidden_error(client):
     print("[red][!] Вы не подписаны на группу нет возможности добавить user.")
     print("[red][!] Для дальнейшего избежания ошибки, запускаю подписку на группы, это займет некоторое время")
     client_disconnect_telegram(client)
-    # """Запускаем отписку"""
-    # unsubscribe_from_groups_and_channels()
-    # """Запускаем подписку"""
-    # subscription_from_groups_and_channels()
 
 
 def telegram_user_id_invalid_error(client):

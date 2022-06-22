@@ -3,13 +3,11 @@ import os
 
 from rich import print
 
-# https://docs.python.org/3/library/configparser.html
-# cpass = configparser.ConfigParser перенос в глобальную переменную вызывает сбой
 from system.auxiliary_functions.auxiliary_functions import clearing_console_showing_banner
 from system.auxiliary_functions.global_variables import console
 from system.auxiliary_functions.global_variables import toaster
 from system.sqlite_working_tools.sqlite_working_tools import opening_the_database
-from system.telegram_actions.telegram_actions import telegram_connect
+from system.telegram_actions.telegram_actions import telegram_connect_new_accounts
 
 config = configparser.ConfigParser(empty_lines_in_values=False, allow_no_value=True)
 
@@ -66,7 +64,7 @@ def find_file():
         cursor.executemany("INSERT INTO config (id, hash, phone) VALUES (?, ?, ?)", (entities,))
 
     # Подключение к telegram, возвращаем client для дальнейшего отключения сессии
-    client = telegram_connect(phone_data, api_id_data, api_hash_data)
+    client = telegram_connect_new_accounts(phone_data, api_id_data, api_hash_data)
     # Разрываем сессию, для предотвращения дальнейших сбоев
     client.disconnect()
 

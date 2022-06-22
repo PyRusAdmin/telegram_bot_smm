@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import os
 import random
 import sqlite3
 import time
@@ -19,12 +18,9 @@ from system.Error.TelegramErrors import telegram_phone_number_banned_error
 from system.auxiliary_functions.auxiliary_functions import clearing_console_showing_banner
 from system.auxiliary_functions.global_variables import config
 from system.auxiliary_functions.global_variables import console
-# from system.auxiliary_functions.global_variables import file_path_gr
 from system.auxiliary_functions.global_variables import toaster
 from system.sqlite_working_tools.sqlite_working_tools import opening_a_database_with_accounts
 from system.sqlite_working_tools.sqlite_working_tools import opening_the_database
-# from system.telegram_actions.telegram_actions import connecting_to_the_telegram_client
-# from system.telegram_actions.telegram_actions import telegram_connect
 from system.telegram_actions.telegram_actions import get_from_the_list_phone_api_id_api_hash
 
 config.read('setting/time_subscription.ini')
@@ -45,7 +41,8 @@ def writing_group_links_to_file():
     writing_group = ''
     # Запускаем программу в бесконечном цикле, пока не будет введено слово для остановки
     while writing_group != "stop":
-        writing_group: str = console.input("[bold red][+] Введите ссылку на группу, для записи в файл, или слово stop: ")
+        writing_group: str = console.input(
+            "[bold red][+] Введите ссылку на группу, для записи в файл, или слово stop: ")
         if writing_group != "stop":
             """Записываем ссылку на группу для parsing в файл setting/members_group.db"""
             # Открываем файл setting/members_group.db и проверяем на наличие
@@ -110,8 +107,8 @@ def subscription_all():
         phone, api_id, api_hash = get_from_the_list_phone_api_id_api_hash(row)
         print(f"\n[bold red]{phone} [!] Account connect")
         client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
-        
-        try: 
+
+        try:
             client.connect()
             print(f"[bold red][!] Account connect {phone}")
 
@@ -126,7 +123,7 @@ def subscription_all():
                 group = {'writing_group_links': groups[0]}
                 # Вытягиваем данные из кортежа, для подстановки
                 groups_wr = group['writing_group_links']
-            
+
                 """Показываем уже подписанные группы / каналы"""
                 for dialog in client.iter_dialogs():
                     print(f"[bold green]{dialog.name}", 'has ID', f"[bold green]{dialog.id}")
@@ -158,32 +155,17 @@ def subscription_all():
                 except (PeerFloodError, FloodWaitError):
                     """Предупреждение о Flood"""
                     print("[red][!] Предупреждение о Flood от telegram.")
-            
+
             # Закрываем сессию при успешной подписке
             client.disconnect()
-        
+
         except (PhoneNumberBannedError, UserDeactivatedBanError):
             """Если номер телефона был banned, то удаляем сессию и номер с базы данных"""
             # Удаляем номер телефона с базы данных
             telegram_phone_number_banned_error(client, phone)
-        
+
     print('[bold green][+] На группы подписались!')
     toaster.show_toast("Telegram_BOT_SMM", "На группы подписались!", icon_path="system/ico/custom.ico", duration=5)
-
-
-# def chats_id_def_one(client):
-#     """Показываем ID чатов, только id, записываем результат в файл"""
-#     with open(f"{file_path_gr}", "r") as chat_add:
-#         for line in chat_add:
-#             for dialog in client.iter_dialogs():
-#                 print(f"[bold green]{dialog.name}", 'has ID', f"[bold green]{dialog.id}")
-#             client(JoinChannelRequest(line))
-#             print(f"[bold red]Присоединился к группе или чату {line}")
-#             print(f"[bold green][+] Подождите {time_subscription1}-{time_subscription2} Секунд...")
-#             time.sleep(random.randrange(int(time_subscription1), int(time_subscription2)))
-#     client.disconnect()
-#     print('[bold green][+] На группы подписались.')
-#     toaster.show_toast("Telegram_BOT_SMM", "На группы подписались!", icon_path="system/ico/custom.ico", duration=5)
 
 
 def channel_and_group_subscription_function(client, target_group):
@@ -192,18 +174,6 @@ def channel_and_group_subscription_function(client, target_group):
     print(f"[bold red][+] Присоединился к группе или чату {target_group}")
     print(f"[bold green][+] Подождите {time_subscription1}-{time_subscription2} Секунд...")
     time.sleep(random.randrange(int(time_subscription1), int(time_subscription2)))
-
-
-# def subscription_from_groups_and_channels():
-#     """Отписка от групп и каналов с одного аккаунта"""
-#     # Открываем базу данных для работы с аккаунтами accounts/config.db
-#     cursor = opening_a_database_with_accounts()
-#     # Количество аккаунтов на данный момент в работе
-#     records = cursor.fetchall()
-#     print(f"[bold red]Всего accounts: {len(records)}")
-#     phone, api_id, api_hash = connecting_to_the_telegram_client(records)
-#     client = telegram_connect(phone, api_id, api_hash)
-#     chats_id_def_one(client)
 
 
 if __name__ == "__main__":

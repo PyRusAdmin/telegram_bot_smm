@@ -46,8 +46,6 @@ def telegram_connect_new_accounts(phone, api_id, api_hash):
     """Account telegram connect, с проверкой на валидность, если ранее не было соединения, то запрашиваем код"""
     client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
     client.connect()
-    # first_name, last_name = account_name(client, name_client)
-    # print(f"[bold red][!] Account connect {first_name} {last_name} {phone}")
     if not client.is_user_authorized():
         client.send_code_request(phone)
         try:

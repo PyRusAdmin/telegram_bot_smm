@@ -36,4 +36,3 @@ def write_add_members(user):
 
 if __name__ == "__main__":
     clearing_console_showing_banner()
-    # del_members_db()

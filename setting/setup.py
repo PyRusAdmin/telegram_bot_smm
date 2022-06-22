@@ -50,30 +50,5 @@ def requirements():
     else:
         pass
 
-    # """Создаем необходимые файлы для работы с программой"""
-    #
-    # def creating_a_database_file_and_tables():
-    #     # Создаем файл members_group.db
-    #     with sqlite3.connect('setting/members_group.db', timeout=10) as sqlite_connection:
-    #         """
-    #         После создания объекта соединения с базой данных нужно создать объект cursor.
-    #         Он позволяет делать SQL-запросы к базе.
-    #         """
-    #         cursor = sqlite_connection.cursor()
-    #         """
-    #         IF NOT EXISTS поможет при попытке повторного подключения к базе данных.
-    #         Запрос проверит, существует ли таблица. Если да — проверит, ничего ли не поменялось.
-    #         """
-    #         # Создаем таблицу members, функция execute отвечает за SQL-запрос
-    #         cursor.execute(
-    #             "CREATE TABLE IF NOT EXISTS members(username, id, access_hash, name, user_phone, online_at, "
-    #             "photos_id, target_groups)")
-    #         # Создаем таблицу writing_group_links, функция execute отвечает за SQL-запрос
-    #         cursor.execute("CREATE TABLE IF NOT EXISTS writing_group_links(writing_group_links)")
-    #         # Сохраняем изменения с помощью функции commit для объекта соединения
-    #         cursor.commit()
-    #
-    # creating_a_database_file_and_tables()
-
 
 requirements()

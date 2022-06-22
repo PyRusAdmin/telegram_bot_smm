@@ -54,7 +54,6 @@ def creating_contact_database():
                                     "txt: ")
     # Открываем файл с которым будем работать
     with open(f"{folder}/{file_name_input}.txt", "r") as file_contact:
-
         for line in file_contact.readlines():
             print(line.strip())
             # strip() - удаляет с конца и начала строки лишние пробелы, в том числе символ окончания строки
@@ -85,7 +84,6 @@ def show_account_contact_list():
             if not client.is_user_authorized():
                 # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
                 deleting_an_invalid_session(phone)
-            # client.connect()
             all_participants: list = []
             result = client(functions.contacts.GetContactsRequest(hash=0))
             # Печатаем результат
@@ -139,8 +137,6 @@ def show_account_contact_list():
         except KeyError:
             sys.exit(1)
 
-    # sqlite_connection.close()
-
 
 def delete_contact():
     """Удаляем контакты с аккаунтов"""
@@ -158,11 +154,11 @@ def delete_contact():
             print(f"[bold red][!] Account connect {phone}")
 
             client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
-            if not client.is_user_authorized():
-                # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
-                deleting_an_invalid_session(phone)
             try:
                 client.connect()
+                if not client.is_user_authorized():
+                    # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
+                    deleting_an_invalid_session(phone)
 
                 all_participants: list = []
                 result = client(functions.contacts.GetContactsRequest(hash=0))
@@ -234,12 +230,12 @@ def inviting_contact():
         print(f"[bold red][!] Account connect {phone}")
 
         client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
-        if not client.is_user_authorized():
-            # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
-            deleting_an_invalid_session(phone)
-
         try:
             client.connect()
+            if not client.is_user_authorized():
+                # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
+                deleting_an_invalid_session(phone)
+
             # Открываем сформированный список parsing_result/contact.db
             with sqlite3.connect('parsing_result/contact.db', timeout=10) as sqlite_connection_members:
                 cursor_members = sqlite_connection_members.cursor()
