@@ -621,11 +621,13 @@ def sending_messages_chats():
     elif user_input == "3":
         """Запись чатов в файл для рассылки сообщений"""
         output_the_input_field()
+        # Возвращаемся в начальное меню
+        sending_messages_chats()
     elif user_input == "4":
         """Помощь"""
         open_help()
-        # После отработки функции возвращаемся в начальное меню
-        program_settings()
+        # Возвращаемся в начальное меню
+        sending_messages_chats()
     elif user_input == "5":
         """Вернуться назад"""
         # После отработки функции возвращаемся в начальное меню

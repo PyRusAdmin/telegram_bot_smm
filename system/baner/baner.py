@@ -3,9 +3,9 @@ from rich.console import Console
 console = Console()
 style = "bold red"
 # Версия программы
-program_version = "0.4.9"
+program_version = "0.5.0"
 # Дата изменения
-date_of_program_change = "20.06.2022"
+date_of_program_change = "22.06.2022"
 
 
 # составлено с помощью https://manytools.org/hacker-tools/ascii-banner/

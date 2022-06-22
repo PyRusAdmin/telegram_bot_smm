@@ -42,6 +42,26 @@ def telegram_connect(phone, api_id, api_hash):
     return client
 
 
+def telegram_connect_new_accounts(phone, api_id, api_hash):
+    """Account telegram connect, с проверкой на валидность, если ранее не было соединения, то запрашиваем код"""
+    client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
+    client.connect()
+    # first_name, last_name = account_name(client, name_client)
+    # print(f"[bold red][!] Account connect {first_name} {last_name} {phone}")
+    if not client.is_user_authorized():
+        client.send_code_request(phone)
+        try:
+            # Если ранее аккаунт не подсоединялся, то просим ввести код подтверждения
+            client.sign_in(phone, code=console.input("[bold red][+] Введите код: "))
+        except SessionPasswordNeededError:
+            """
+            https://telethonn.readthedocs.io/en/latest/extra/basic/creating-a-client.html#two-factor-authorization-2fa
+            """
+            # Если аккаунт имеет password, то просим пользователя ввести пароль
+            client.sign_in(password=getpass.getpass())
+    return client
+
+
 def account_name(client, name_account):
     """Показываем имя аккаунта с которого будем взаимодействовать"""
     full = client(GetFullUserRequest(name_account))
@@ -63,4 +83,3 @@ def get_from_the_list_phone_api_id_api_hash(row):
     api_id = users['id']
     api_hash = users['hash']
     return phone, api_id, api_hash
-
