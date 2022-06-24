@@ -8,13 +8,13 @@ from telethon.errors import BotGroupsBlockedError
 from telethon.errors import ChannelPrivateError
 from telethon.errors import ChannelsTooMuchError
 from telethon.errors import ChatAdminRequiredError
-from telethon.errors import ChatWriteForbiddenError
+# from telethon.errors import ChatWriteForbiddenError
 from telethon.errors import FloodWaitError
 from telethon.errors import PeerFloodError
-from telethon.errors import PhoneNumberBannedError
+# from telethon.errors import PhoneNumberBannedError
 from telethon.errors import UserBannedInChannelError
 from telethon.errors import UserChannelsTooMuchError
-from telethon.errors import UserDeactivatedBanError
+# from telethon.errors import UserDeactivatedBanError
 from telethon.errors import UserIdInvalidError
 from telethon.errors import UserKickedError
 from telethon.errors import UserNotMutualContactError
@@ -29,23 +29,25 @@ from system.Error.TelegramErrors import removing_a_participant_from_the_list
 from system.Error.TelegramErrors import telegram_bot_groups_blocked_error
 from system.Error.TelegramErrors import telegram_channel_private_error
 from system.Error.TelegramErrors import telegram_chat_admin_required_error
-from system.Error.TelegramErrors import telegram_chat_write_forbidden_error
+# from system.Error.TelegramErrors import telegram_chat_write_forbidden_error
 from system.Error.TelegramErrors import telegram_exceeded_the_limit_of_super_groups
 from system.Error.TelegramErrors import telegram_flood_error
 from system.Error.TelegramErrors import telegram_invalid_user_name
-from system.Error.TelegramErrors import telegram_phone_number_banned_error
+# from system.Error.TelegramErrors import telegram_phone_number_banned_error
 from system.Error.TelegramErrors import telegram_user_banned_in_channel_error
 from system.Error.TelegramErrors import telegram_user_kicked_error
 from system.Error.TelegramErrors import telegram_user_not_mutual_contact_error
-from system.auxiliary_functions.auxiliary_functions import clearing_console_showing_banner
+# from system.auxiliary_functions.auxiliary_functions import clearing_console_showing_banner
 from system.auxiliary_functions.auxiliary_functions import write_add_members
 from system.auxiliary_functions.global_variables import config
 from system.auxiliary_functions.global_variables import name_client
 from system.auxiliary_functions.global_variables import toaster
 from system.sqlite_working_tools.sqlite_working_tools import opening_a_database_with_accounts
 from system.sqlite_working_tools.sqlite_working_tools import opening_the_list_for_inviting
-from system.telegram_actions.telegram_actions import account_name, get_from_the_list_phone_api_id_api_hash
-from system.telegram_actions.telegram_actions import deleting_an_invalid_session
+from system.telegram_actions.telegram_actions import account_name, get_from_the_list_phone_api_id_api_hash, \
+    checking_accounts_for_validity
+
+# from system.telegram_actions.telegram_actions import deleting_an_invalid_session
 
 config.read('setting/writing_data_to_a_file.ini')
 # console = Console()
@@ -54,7 +56,7 @@ target_group_entity = config['cred']['target_group_entity']
 
 def inviting_by_members():
     """Inviting по списку members_group.db"""
-    clearing_console_showing_banner()
+    # clearing_console_showing_banner()
     # Местоположение файла для inviting
     members_db = "setting/members_group.db"
     invitation_from_all_accounts_program_body(members_db)
@@ -72,6 +74,7 @@ def invitation_from_all_accounts_program_body(members):
     toaster.show_toast("Telegram_BOT_SMM", f"Inviting в группу {target_group_entity}",
                        icon_path="system/ico/custom.ico",
                        duration=5)
+    checking_accounts_for_validity()
     # Открываем базу данных для работы с аккаунтами accounts/config.db
     cursor = opening_a_database_with_accounts()
     # Количество аккаунтов на данный момент в работе
@@ -83,13 +86,14 @@ def invitation_from_all_accounts_program_body(members):
         client = TelegramClient(f"accounts/{phone}", api_id, api_hash)
         try:
             client.connect()
+
+            # if not client.is_user_authorized():
+            # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
+            # deleting_an_invalid_session(phone)
             # Показываем имя и фамилию аккаунта к которому подсоединились
             first_name, last_name = account_name(client, name_client)
             print(f"[bold red][!] Account connect {first_name} {last_name} {phone}\n",
                   f"[red][!] Inviting в {target_group_entity}")
-            if not client.is_user_authorized():
-                # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
-                deleting_an_invalid_session(phone)
 
             # Подписываемся на группу которую будем inviting, если аккаунт новый, то он автоматически подпишется
             client(JoinChannelRequest(target_group_entity))
@@ -101,15 +105,15 @@ def invitation_from_all_accounts_program_body(members):
             print(f"[bold red]Всего username: {len(records_members)}")
 
             for rows in records_members:
-                user = {'username': rows[0], 'id': rows[1], 'access_hash': rows[2], 'target_groups': rows[7]}
+                user = {'username': rows[0], 'id': rows[1], 'access_hash': rows[2]}
                 username = user["username"]
                 user_id = user["id"]
                 access_hash = user["access_hash"]
-                target_groups = user["target_groups"]
+                # target_groups = user["target_groups"]
                 print(f"[bold green][!] Добавляем {user_id}")
                 try:
                     # Подписываемся на группу, если подсоединен новый аккаунт, то автоматически подпишется
-                    client(JoinChannelRequest(target_groups))
+                    # client(JoinChannelRequest(target_groups))
                     user_to_add = client.get_input_entity(username)
                     if username == "":
                         user_to_add = InputPeerUser(user_id, access_hash)
@@ -134,10 +138,10 @@ def invitation_from_all_accounts_program_body(members):
                             continue
                         print('[green][+] Список почистили, и в файл записали.')
                     continue
-                except ChatWriteForbiddenError:
-                    """Вы не подписаны на группу / канал, открываем функцию подписки и подписываемся"""
-                    telegram_chat_write_forbidden_error(client)
-                    break
+                # except ChatWriteForbiddenError:
+                #     """Вы не подписаны на группу / канал, открываем функцию подписки и подписываемся"""
+                #     telegram_chat_write_forbidden_error(client)
+                #     break
                 except (UserChannelsTooMuchError, UserPrivacyRestrictedError):
                     telegram_exceeded_the_limit_of_super_groups(user)
                     continue
@@ -172,10 +176,10 @@ def invitation_from_all_accounts_program_body(members):
                     continue
                 except (TypeError, UnboundLocalError):
                     continue
-        except (PhoneNumberBannedError, UserDeactivatedBanError):
+        # except (PhoneNumberBannedError, UserDeactivatedBanError):
             # Удаляем номер телефона с базы данных
-            telegram_phone_number_banned_error(client, phone)
-            continue
+            # telegram_phone_number_banned_error(client, phone)
+            # continue
         except KeyError:
             sys.exit(1)
     toaster.show_toast("Telegram_BOT_SMM", f"Работа с группой {target_group_entity} окончена!",

@@ -7,7 +7,8 @@ from system.auxiliary_functions.auxiliary_functions import clearing_console_show
 from system.auxiliary_functions.global_variables import console
 from system.auxiliary_functions.global_variables import toaster
 from system.sqlite_working_tools.sqlite_working_tools import opening_the_database
-from system.telegram_actions.telegram_actions import telegram_connect_new_accounts
+# from system.telegram_actions.telegram_actions import telegram_connect_new_accounts
+from system.telegram_actions.telegram_actions import telegram_connect
 
 config = configparser.ConfigParser(empty_lines_in_values=False, allow_no_value=True)
 
@@ -15,7 +16,7 @@ folder = "setting"
 
 
 def writing_api_id_api_hash():
-    """Записываем api, hash"""
+    """Записываем api, hash полученный с помощью регистрации приложения на сайте https://my.telegram.org/auth"""
     print("[bold red][!] Получить api_id, api_hash можно на сайте https://my.telegram.org/auth или вводим уже "
           "имеющиеся")
     print("[bold red]После ввода данных, программа переведет вас автоматически на начальное меню")
@@ -64,7 +65,7 @@ def find_file():
         cursor.executemany("INSERT INTO config (id, hash, phone) VALUES (?, ?, ?)", (entities,))
 
     # Подключение к telegram, возвращаем client для дальнейшего отключения сессии
-    client = telegram_connect_new_accounts(phone_data, api_id_data, api_hash_data)
+    client = telegram_connect(phone_data, api_id_data, api_hash_data)
     # Разрываем сессию, для предотвращения дальнейших сбоев
     client.disconnect()
 
