@@ -8,9 +8,7 @@ from telethon.errors import ChannelPrivateError
 from telethon.errors import ChatWriteForbiddenError
 from telethon.errors import FloodWaitError
 from telethon.errors import PeerFloodError
-from telethon.errors import PhoneNumberBannedError
 from telethon.errors import UserBannedInChannelError
-from telethon.errors import UserDeactivatedBanError
 from telethon.errors.rpcerrorlist import BotGroupsBlockedError
 from telethon.errors.rpcerrorlist import ChatAdminRequiredError
 from telethon.errors.rpcerrorlist import UserChannelsTooMuchError
@@ -31,7 +29,6 @@ from system.Error.TelegramErrors import telegram_chat_write_forbidden_error
 from system.Error.TelegramErrors import telegram_exceeded_the_limit_of_super_groups
 from system.Error.TelegramErrors import telegram_flood_error
 from system.Error.TelegramErrors import telegram_invalid_user_name
-from system.Error.TelegramErrors import telegram_phone_number_banned_error
 from system.Error.TelegramErrors import telegram_user_banned_in_channel_error
 from system.Error.TelegramErrors import telegram_user_id_invalid_error
 from system.Error.TelegramErrors import telegram_user_kicked_error
@@ -43,10 +40,9 @@ from system.auxiliary_functions.global_variables import name_client
 from system.auxiliary_functions.global_variables import toaster
 from system.baner.baner import date_of_program_change
 from system.baner.baner import program_version
-from system.sqlite_working_tools.sqlite_working_tools import opening_a_database_with_accounts
 from system.sqlite_working_tools.sqlite_working_tools import opening_the_list_for_inviting
-from system.telegram_actions.telegram_actions import account_name
-from system.telegram_actions.telegram_actions import deleting_an_invalid_session
+from system.telegram_actions.telegram_actions import account_name, checking_accounts_for_validity, \
+    open_database_accounts, we_get_username_user_id_access_hash
 from system.telegram_actions.telegram_actions import get_from_the_list_phone_api_id_api_hash
 
 
@@ -122,16 +118,12 @@ def we_send_a_message_by_numbers_contacts():
 
 def sending_files_to_a_personal_account():
     """Отправка файлов в личку"""
-
-    clearing_console_showing_banner()
+    checking_accounts_for_validity()
     members_db = "setting/members_group.db"
     # Просим пользователя ввести расширение сообщения
     link_to_the_file: str = console.input("[bold red][+] Введите название файла с папки setting/files_to_send: ")
     # Открываем базу данных для работы с аккаунтами accounts/config.db
-    cursor = opening_a_database_with_accounts()
-    # Количество аккаунтов на данный момент в работе
-    records = cursor.fetchall()
-    print(f"[bold red]Всего accounts: {len(records)}")
+    records = open_database_accounts()
     for row in records:
         # Получаем со списка phone, api_id, api_hash
         phone, api_id, api_hash = get_from_the_list_phone_api_id_api_hash(row)
@@ -141,9 +133,6 @@ def sending_files_to_a_personal_account():
             # Показываем имя и фамилию аккаунта к которому подсоединились
             first_name, last_name = account_name(client, name_client)
             print(f"[bold red][!] Account connect {first_name} {last_name} {phone}")
-            if not client.is_user_authorized():
-                # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
-                deleting_an_invalid_session(phone)
 
             # Открываем parsing список setting/members_group.db для inviting в группу
             cursor_members = opening_the_list_for_inviting(members_db)
@@ -152,10 +141,7 @@ def sending_files_to_a_personal_account():
             print(f"[bold red]Всего username: {len(records_members)}")
 
             for rows in records_members:
-                user = {'username': rows[0], 'id': rows[1], 'access_hash': rows[2]}
-                username = user["username"]
-                user_id = user["id"]
-                access_hash = user["access_hash"]
+                username, user_id, access_hash, user = we_get_username_user_id_access_hash(rows)
                 print("[green][+] Отправляем сообщение:", {user_id})
                 try:
                     user_to_add = client.get_input_entity(username)
@@ -210,10 +196,6 @@ def sending_files_to_a_personal_account():
                     continue
                 except (TypeError, UnboundLocalError):
                     continue
-        except (PhoneNumberBannedError, UserDeactivatedBanError):
-            # Удаляем номер телефона с базы данных
-            telegram_phone_number_banned_error(client, phone)
-            continue
         except KeyError:
             sys.exit(1)
     toaster.show_toast("Telegram_BOT_SMM", "Работа окончена!", icon_path="system/ico/custom.ico", duration=5)
@@ -221,12 +203,9 @@ def sending_files_to_a_personal_account():
 
 def we_send_a_message_from_all_accounts(members, message_text):
     """Отправка сообщений в личку"""
-
+    checking_accounts_for_validity()
     # Открываем базу данных для работы с аккаунтами accounts/config.db
-    cursor = opening_a_database_with_accounts()
-    # Количество аккаунтов на данный момент в работе
-    records = cursor.fetchall()
-    print(f"[bold red]Всего accounts: {len(records)}")
+    records = open_database_accounts()
     for row in records:
         # Получаем со списка phone, api_id, api_hash
         phone, api_id, api_hash = get_from_the_list_phone_api_id_api_hash(row)
@@ -236,9 +215,6 @@ def we_send_a_message_from_all_accounts(members, message_text):
             # Показываем имя и фамилию аккаунта к которому подсоединились
             first_name, last_name = account_name(client, name_client)
             print(f"[bold red][!] Account connect {first_name} {last_name} {phone}")
-            if not client.is_user_authorized():
-                # Если не валидная сессия, удаляем со списка accounts/config.db и файл session
-                deleting_an_invalid_session(phone)
 
             # Открываем parsing список setting/members_group.db для inviting в группу
             cursor_members = opening_the_list_for_inviting(members)
@@ -247,10 +223,7 @@ def we_send_a_message_from_all_accounts(members, message_text):
             print(f"[bold red]Всего username: {len(records_members)}")
 
             for rows in records_members:
-                user = {'username': rows[0], 'id': rows[1], 'access_hash': rows[2]}
-                username = user["username"]
-                user_id = user["id"]
-                access_hash = user["access_hash"]
+                username, user_id, access_hash, user = we_get_username_user_id_access_hash(rows)
                 print("[green][+] Отправляем сообщение:", {user_id})
                 try:
                     user_to_add = client.get_input_entity(username)
@@ -305,10 +278,6 @@ def we_send_a_message_from_all_accounts(members, message_text):
                     continue
                 except (TypeError, UnboundLocalError):
                     continue
-        except (PhoneNumberBannedError, UserDeactivatedBanError):
-            # Удаляем номер телефона с базы данных
-            telegram_phone_number_banned_error(client, phone)
-            continue
         except KeyError:
             sys.exit(1)
     toaster.show_toast("Telegram_BOT_SMM", "Работа окончена!", icon_path="system/ico/custom.ico", duration=5)

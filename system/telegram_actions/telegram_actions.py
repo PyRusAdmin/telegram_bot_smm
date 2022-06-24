@@ -13,6 +13,24 @@ from system.auxiliary_functions.global_variables import console
 from system.sqlite_working_tools.sqlite_working_tools import opening_a_database_with_accounts
 
 
+def open_database_accounts():
+    """Выводим список аккаунтов"""
+    cursor = opening_a_database_with_accounts()
+    # Количество аккаунтов на данный момент в работе
+    records = cursor.fetchall()
+    print(f"[bold red]Всего accounts: {len(records)}")
+    return
+
+
+def we_get_username_user_id_access_hash(rows):
+    """Получаем username, user_id, access_hash"""
+    user = {'username': rows[0], 'id': rows[1], 'access_hash': rows[2]}
+    username = user["username"]
+    user_id = user["id"]
+    access_hash = user["access_hash"]
+    return username, user_id, access_hash, user
+
+
 def deleting_an_invalid_session(phone):
     """Удаляем не валидную сессию, если аккаунт banned"""
     telegram_user_deactivated_ban_error(phone)

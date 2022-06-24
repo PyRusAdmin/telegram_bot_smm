@@ -36,10 +36,9 @@ from system.auxiliary_functions.auxiliary_functions import write_add_members
 from system.auxiliary_functions.global_variables import config
 from system.auxiliary_functions.global_variables import name_client
 from system.auxiliary_functions.global_variables import toaster
-from system.sqlite_working_tools.sqlite_working_tools import opening_a_database_with_accounts
 from system.sqlite_working_tools.sqlite_working_tools import opening_the_list_for_inviting
 from system.telegram_actions.telegram_actions import account_name, get_from_the_list_phone_api_id_api_hash, \
-    checking_accounts_for_validity
+    checking_accounts_for_validity, open_database_accounts, we_get_username_user_id_access_hash
 
 config.read('setting/writing_data_to_a_file.ini')
 target_group_entity = config['cred']['target_group_entity']
@@ -66,10 +65,7 @@ def invitation_from_all_accounts_program_body(members):
                        duration=5)
     checking_accounts_for_validity()
     # Открываем базу данных для работы с аккаунтами accounts/config.db
-    cursor = opening_a_database_with_accounts()
-    # Количество аккаунтов на данный момент в работе
-    records = cursor.fetchall()
-    print(f"[bold red]Всего accounts: {len(records)}")
+    records = open_database_accounts()
     for row in records:
         # Получаем со списка phone, api_id, api_hash
         phone, api_id, api_hash = get_from_the_list_phone_api_id_api_hash(row)
@@ -91,10 +87,7 @@ def invitation_from_all_accounts_program_body(members):
             print(f"[bold red]Всего username: {len(records_members)}")
 
             for rows in records_members:
-                user = {'username': rows[0], 'id': rows[1], 'access_hash': rows[2]}
-                username = user["username"]
-                user_id = user["id"]
-                access_hash = user["access_hash"]
+                username, user_id, access_hash, user = we_get_username_user_id_access_hash(rows)
                 print(f"[bold green][!] Добавляем {user_id}")
                 try:
                     user_to_add = client.get_input_entity(username)

@@ -23,7 +23,6 @@ from actions.send_mess_chat.chat_dialog import sending_messages_files_via_chats
 from actions.sms.sms import sending_files_to_a_personal_account
 from actions.sms.sms import we_send_a_message_by_members
 from actions.sms.sms import we_send_a_message_by_numbers_contacts
-# from actions.sms.sms import we_send_a_message_from_all_accounts
 from actions.subscription.subscription import cleaning_the_list_with_groups_for_subscription
 from actions.subscription.subscription import subscription_all
 from actions.subscription.subscription import writing_group_links_to_file
