@@ -1,0 +1,5 @@
+rich>=13.0.0
+telethon>=1.28.0
+schedule>=1.2.0
+emoji>=2.0.0
+win10toast>=0.9
